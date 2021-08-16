@@ -1,6 +1,12 @@
 #### Carina
 
-Carina是一套基于Kubernetes CSI标准实现的存储插件，用户可以使用标准的storageClass/PVC/PV原语申请carina提供的存储介质；Carina是一套云原生的存储插件，完全基于Kubernetes进行安装。它包含三个主要组件：carina-scheduler、carin-controller及carina-node，全部一容器化形势运行在Kubernetes中，并且占用极少的资源。
+[![Go Report Card](https://goreportcard.com/badge/github.com/BoCloud/carina)](https://goreportcard.com/report/github.com/BoCloud/carina)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/BoCloud/carina/blob/master/LICENSE)
+
+
+Carina是一款基于Kubernetes CSI标准实现的存储插件，用户可以使用标准的storageClass/PVC/PV原语申请carina提供的存储介质；carina包含三个主要组件：carina-scheduler、carin-controller以及carina-node，全部以容器化形式运行在Kubernetes中，并且占用极少的资源。
+
+Carina是为数据库而生的本地存储方案，编排管理本地磁盘并根据磁盘类型构建多种资源池，为数据库等应用提供极致性能的本地存储
 
 #### 支持环境
 
@@ -8,7 +14,7 @@ Carina是一套基于Kubernetes CSI标准实现的存储插件，用户可以使
 - Node OS：Linux
 - Filesystems：ext4，xfs
 
-#### Carina architecture
+#### 总体架构
 
 ![carina-arch](docs/img/carina.png)
 
@@ -22,22 +28,47 @@ Carina是一套基于Kubernetes CSI标准实现的存储插件，用户可以使
 
 #### 功能列表
 
-| Carina功能 | 是否支持 |
-| ---------- | -------- |
-| 动态pv     | 支持     |
-| 文件存储   | 支持     |
-| 块存储     | 支持     |
-| 容量限制   | 支持     |
-| 自动扩容   | 支持     |
-| 快照       | 不支持   |
-| 拓扑       | 支持     |
+- [部署](docs/manual/deploy.md)
+- [磁盘管理](docs/manual/disk-manager.md)
+- [设备注册](docs/manual/device-register)
+- [基于文件系统使用](docs/manual/pvc-filesystem.md)
+- [基于块设备使用](docs/manual/pvc-device.md)
+- [pvc扩容](docs/pvc-expand.md)
+- [基于容量的调度](docs/manual/capacity-scheduler.md)
+- [卷拓扑](docs/manual/topology.md)
+- [磁盘缓存使用](docs/manual/bcache.md)
+- [raid管理](docs/manual/raid-manager.md)
+- [容灾转移](docs/manual/failover.md)
+- [FAQ](docs/manual/FAQ.md)
 
-#### 开始
+#### 快速开始
 
 - 进入部署目录`cd deploy/kubernetes` 执行 `./deploy.sh`进行部署，`./deploy.sh uninstall`进行卸载
-- 详细部署及使用参考`docs/使用手册.md`
+- 详细部署及使用参考[使用手册](docs/user-guide.md)
 
-#### 文档
+#### 贡献项目
 
-- 请查看docs目录下设计及使用文档
+- [开发文档](docs/manual/development.md)
+- [构建运行时容器](docs/runtime-container.md)
+
+#### 常见存储方案对比
+
+|            | NFS/NAS                    | SAN                                         | Ceph                                       | Carina                                                       |
+| ---------- | -------------------------- | ------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------ |
+| 设计场景   | 通用存储场景               | 高性能块设备                                | 追求扩展性的通用存储场景                   | 为云数据库而生的高性能块存储                                 |
+| 文件存储   | 支持                       | 支持                                        | 支持                                       | 支持                                                         |
+| 块存储     | 不支持                     | 视驱动程序而定                              | 支持                                       | 支持                                                         |
+| 文件系统   | 不支持格式化               | 视驱动程序而定                              | 支持ext4/xfs等                             | 支持ext4/xfs等                                               |
+| 宽带       | 差/中等                    | 中等                                        | 高                                         | 高                                                           |
+| IOPS       | 差/中等                    | 高                                          | 中等                                       | 低                                                           |
+| 延迟       | 差/中等                    | 低                                          | 差                                         | 支持                                                         |
+| CSI支持    | 支持                       | 支持                                        | 支持                                       | 支持                                                         |
+| 快照       | 不支持                     | 视驱动程序而定                              | 支持                                       | 待支持                                                       |
+| 克隆       | 不支持                     | 视驱动程序而定                              | 支持                                       | 待支持                                                       |
+| 配额       | 不支持                     | 支持                                        | 支持                                       | 支持                                                         |
+| 扩容       | 支持                       | 支持                                        | 支持                                       | 支持                                                         |
+| 数据高可用 | 依赖RAID或NAS设备          | 支持                                        | 支持                                       | 依赖RAID                                                     |
+| 可维护性   |                            | 不同的SAN设备需要不同的驱动程序，管理成本高 | 架构复杂，需要专人维护                     | 高                                                           |
+| 成本       | NFS服务器或NAS设备，成本高 | SAN设备，客户端配置HBA卡，成本高            | 专用存储集群，客户端需配置存储网卡，成本高 | K8s集群中剩余的本地磁盘，成本低                              |
+| 其他特性   | 容器迁移后数据跟随         | 容器迁移后数据跟随                          | 支持对象存储，容器迁移后数据跟随           | 支持binpack/spreadout等调度策略<br>针对有状态容器，支持原地重启、重建<br>容器迁移后，数据不能跟随，需要应用层面实现数据恢复 |
 
