@@ -55,7 +55,7 @@ $ ./deploy.sh uninstall
 #### 贡献项目
 
 - [开发文档](docs/manual/development.md)
-- [构建运行时容器](docs/runtime-container.md)
+- [构建运行时容器](docs/manual/runtime-container.md)
 
 #### 常见存储方案对比
 
