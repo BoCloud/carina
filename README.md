@@ -1,11 +1,7 @@
 #### Carina
-
-[![Go Report Card](https://goreportcard.com/badge/github.com/BoCloud/carina)](https://goreportcard.com/report/github.com/BoCloud/carina)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/BoCloud/carina/blob/master/LICENSE)
 
-
 Carina是一款基于Kubernetes CSI标准实现的存储插件，用户可以使用标准的storageClass/PVC/PV原语申请carina提供的存储介质；carina包含三个主要组件：carina-scheduler、carin-controller以及carina-node，全部以容器化形式运行在Kubernetes中，并且占用极少的资源。
-
 Carina是为数据库而生的本地存储方案，编排管理本地磁盘并根据磁盘类型构建多种资源池，为数据库等应用提供极致性能的本地存储
 
 #### 支持环境
@@ -39,6 +35,9 @@ Carina是为数据库而生的本地存储方案，编排管理本地磁盘并�
 - [磁盘缓存使用](docs/manual/bcache.md)
 - [raid管理](docs/manual/raid-manager.md)
 - [容灾转移](docs/manual/failover.md)
+- [磁盘限速](docs/manual/disk-speed-limit.md)
+- [指标监控](docs/manual/metrics.md)
+- [API](docs/manual/api.md)
 - [FAQ](docs/manual/FAQ.md)
 
 #### 快速开始
