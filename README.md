@@ -24,15 +24,15 @@ Carina是为数据库而生的本地存储方案，编排管理本地磁盘并�
 
 #### 功能列表
 
-- [部署](docs/manual/deploy.md)
+- [安装](docs/manual/install.md)
 - [磁盘管理](docs/manual/disk-manager.md)
-- [设备注册](docs/manual/device-register)
-- [基于文件系统使用](docs/manual/pvc-filesystem.md)
+- [设备注册](docs/manual/device-register.md)
+- [基于文件系统使用](docs/manual/pvc-xfs.md)
 - [基于块设备使用](docs/manual/pvc-device.md)
-- [pvc扩容](docs/pvc-expand.md)
+- [pvc扩容](docs/manual/pvc-expand.md)
 - [基于容量的调度](docs/manual/capacity-scheduler.md)
 - [卷拓扑](docs/manual/topology.md)
-- [磁盘缓存使用](docs/manual/bcache.md)
+- [磁盘缓存使用](docs/manual/pvc-bcache.md)
 - [raid管理](docs/manual/raid-manager.md)
 - [容灾转移](docs/manual/failover.md)
 - [磁盘限速](docs/manual/disk-speed-limit.md)
@@ -43,7 +43,7 @@ Carina是为数据库而生的本地存储方案，编排管理本地磁盘并�
 #### 快速开始
 
 - 部署步骤
-```build
+```shell
 $ cd deploy/kubernetes
 # 安装
 $ ./deploy.sh

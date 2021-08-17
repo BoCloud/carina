@@ -1,4 +1,4 @@
-#### 本地设备挂载块设备使用
+#### 本地设备挂载文件系统使用
 
 对于k8s存储卷来说其有一套标准的使用流程，如下我们将展示一下在使用carina存储驱动下这些文件如何配置及创建的
 
@@ -31,16 +31,16 @@ mountOptions:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: raw-block-pvc
+  name: csi-carina-pvc
   namespace: carina
 spec:
   accessModes:
-    - ReadWriteOnce
-  volumeMode: Block
+    - ReadWriteOnce # 本地存储只能被一个节点上Pod挂载
   resources:
     requests:
-      storage: 13Gi
+      storage: 7Gi
   storageClassName: csi-carina-sc
+  volumeMode: Filesystem # block便会创建块设备
 ```
 
 PVC创建完成后，carina-controller会创建LogicVolume，carina-node则负责监听LogicVolume的创建事件，并在本地创建lvm存储卷
@@ -51,30 +51,37 @@ NAME                                       SIZE   GROUP           NODE          
 pvc-319c5deb-f637-423b-8b52-42ecfcf0d3b7   7Gi    carina-vg-hdd   10.20.9.154   Success
 ```
 
-挂载到容器内使用`kubectl apply -f pod.yaml`
+挂载到容器内使用`kubectl apply -f deployment.yaml`
 
 ```yaml
 ---
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: carina-block-pod
+  name: carina-deployment
   namespace: carina
+  labels:
+    app: web-server
 spec:
-  containers:
-    - name: centos
-      securityContext:
-        capabilities:
-          add: ["SYS_RAWIO"]
-      image: centos:latest
-      imagePullPolicy: "IfNotPresent"
-      command: ["/bin/sleep", "infinity"]
-      volumeDevices:
-        - name: data
-          devicePath: /dev/xvda
-  volumes:
-    - name: data
-      persistentVolumeClaim:
-        claimName: raw-block-pvc
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-server
+  template:
+    metadata:
+      labels:
+        app: web-server
+    spec:
+      containers:
+        - name: web-server
+          image: nginx:latest
+          imagePullPolicy: "IfNotPresent"
+          volumeMounts:
+            - name: mypvc
+              mountPath: /var/lib/www/html
+      volumes:
+        - name: mypvc
+          persistentVolumeClaim:
+            claimName: csi-carina-pvc
+            readOnly: false
 ```
-
